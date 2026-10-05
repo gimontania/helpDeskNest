@@ -5,9 +5,99 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum RolUsuario {
+  ADMIN
+  AGENTE
+  EMPLEADO
+
+  @@map("rol_usuario")
+}
+
+enum EstadoTarea {
+  ABIERTO
+  EN_PROCESO
+  RESUELTO
+  CERRADO
+
+  @@map("estado_tarea")
+}
+
+enum PrioridadTarea {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+
+  @@map("prioridad_tarea")
+}
+
+model Usuario {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre       String     @db.VarChar(120)
+  email        String     @unique @db.VarChar(254)
+  passwordHash String     @map("password_hash") @db.VarChar(255)
+  rol          RolUsuario @default(EMPLEADO)
+  creadoEn     DateTime   @default(now()) @map("creado_en") @db.Timestamptz(6)
+
+  tareasCreadas   Tarea[]      @relation("crea_ticket")
+  tareasAsignadas Tarea[]      @relation("asignacion_agente")
+  comentarios     Comentario[] @relation("autor_comentario")
+
+  @@map("usuarios")
+}
+
+model Categoria {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String   @unique @db.VarChar(100)
+  descripcion String?  @db.Text
+  creadoEn    DateTime @default(now()) @map("creado_en") @db.Timestamptz(6)
+
+  tareas Tarea[] @relation("categoria_ticket")
+
+  @@map("categorias")
+}
+
+model Tarea {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titulo        String         @db.VarChar(200)
+  descripcion   String         @db.Text
+  estado        EstadoTarea    @default(ABIERTO)
+  prioridad     PrioridadTarea @default(MEDIA)
+  creadorId     String         @map("creador_id") @db.Uuid
+  agenteId      String?        @map("agente_id") @db.Uuid
+  categoriaId   String         @map("categoria_id") @db.Uuid
+  creadoEn      DateTime       @default(now()) @map("creado_en") @db.Timestamptz(6)
+  actualizadoEn DateTime       @default(now()) @updatedAt @map("actualizado_en") @db.Timestamptz(6)
+
+  creador     Usuario      @relation("crea_ticket", fields: [creadorId], references: [id], onDelete: Restrict)
+  agente      Usuario?     @relation("asignacion_agente", fields: [agenteId], references: [id], onDelete: Restrict)
+  categoria   Categoria    @relation("categoria_ticket", fields: [categoriaId], references: [id], onDelete: Restrict)
+  comentarios Comentario[] @relation("comentarios_ticket")
+
+  @@index([creadorId])
+  @@index([agenteId])
+  @@index([categoriaId])
+  @@map("tareas")
+}
+
+model Comentario {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tareaId   String   @map("tarea_id") @db.Uuid
+  autorId   String   @map("autor_id") @db.Uuid
+  contenido String   @db.Text
+  creadoEn  DateTime @default(now()) @map("creado_en") @db.Timestamptz(6)
+
+  tarea Tarea   @relation("comentarios_ticket", fields: [tareaId], references: [id], onDelete: Restrict)
+  autor Usuario @relation("autor_comentario", fields: [autorId], references: [id], onDelete: Restrict)
+
+  @@index([tareaId, creadoEn])
+  @@index([autorId])
+  @@map("comentarios")
 }
