@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 
@@ -17,6 +18,36 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+  const passwordHash = await bcrypt.hash('Password123', 10);
+
+  const usuarios = [
+    {
+      nombre: 'Admin Prueba',
+      email: 'admin@helpdesk.test',
+      rol: 'ADMIN' as const,
+    },
+    {
+      nombre: 'Agente Prueba',
+      email: 'agente@helpdesk.test',
+      rol: 'AGENTE' as const,
+    },
+    {
+      nombre: 'Empleado Prueba',
+      email: 'empleado@helpdesk.test',
+      rol: 'EMPLEADO' as const,
+    },
+  ];
+
+  for (const usuario of usuarios) {
+    await prisma.usuario.upsert({
+      where: { email: usuario.email },
+      update: { rol: usuario.rol },
+      create: { ...usuario, passwordHash },
+    });
+  }
+
+  console.log('Usuarios de prueba creados correctamente.');
+
   const categorias = [
     {
       nombre: 'Hardware',

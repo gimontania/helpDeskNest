@@ -1,0 +1,10 @@
+import { IsEnum, IsOptional } from 'class-validator';
+import { RolUsuario } from '../../generated/prisma/enums';
+
+export class ListarUsuariosDto {
+  @IsOptional()
+  @IsEnum(RolUsuario, {
+    message: 'rol debe ser ADMIN, AGENTE o EMPLEADO',
+  })
+  rol?: RolUsuario;
+}
