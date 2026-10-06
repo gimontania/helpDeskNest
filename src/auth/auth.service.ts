@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { RolUsuario } from '../generated/prisma/enums';
 
 const HASH_FALSO = bcrypt.hashSync('hash-de-relleno', 10);
 
@@ -36,6 +37,7 @@ export class AuthService {
         nombre,
         email: emailNormalizado,
         passwordHash,
+        rol: RolUsuario.EMPLEADO,
       },
       select: {
         id: true,

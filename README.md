@@ -23,6 +23,8 @@
 
 ## Description
 
+Documentación del Help Desk: [US-07 · Listar usuarios por rol](docs/US-07.md).
+
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Project setup
