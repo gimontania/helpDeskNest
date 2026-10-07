@@ -2,7 +2,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EstadoTarea } from '../generated/prisma/enums.js';
+import { EstadoTarea, RolUsuario } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearTareaDto } from './dto/crear-tarea.dto';
 
@@ -33,10 +33,34 @@ export class TareasService {
     });
   }
 
-  async listarMisTareas(creadorId: string) {
+  async listarTareas(creadorId: string, rol: RolUsuario) {
+    const puedeVerTodas =
+      rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
+
     return this.prisma.tarea.findMany({
-      where: {
-        creadorId,
+      where: puedeVerTodas
+        ? undefined
+        : {
+            creadorId,
+          },
+      include: {
+        categoria: true,
+        creador: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            rol: true,
+          },
+        },
+        agente: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            rol: true,
+          },
+        },
       },
       orderBy: {
         creadoEn: 'desc',
@@ -44,11 +68,39 @@ export class TareasService {
     });
   }
 
-  async obtenerMiTarea(id: string, creadorId: string) {
+  async obtenerTarea(
+    id: string,
+    creadorId: string,
+    rol: RolUsuario,
+  ) {
+    const puedeVerTodas =
+      rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
+
     const tarea = await this.prisma.tarea.findFirst({
-      where: {
-        id,
-        creadorId,
+      where: puedeVerTodas
+        ? { id }
+        : {
+            id,
+            creadorId,
+          },
+      include: {
+        categoria: true,
+        creador: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            rol: true,
+          },
+        },
+        agente: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            rol: true,
+          },
+        },
       },
     });
 

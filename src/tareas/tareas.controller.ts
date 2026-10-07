@@ -11,12 +11,13 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
 import { TareasService } from './tareas.service';
 import { CrearTareaDto } from './dto/crear-tarea.dto';
+import { RolUsuario } from '../generated/prisma/enums.js';
 
 interface RequestConUsuario extends Request {
   user: {
     sub: string;
     email: string;
-    rol: string;
+    rol: RolUsuario;
   };
 }
 
@@ -34,15 +35,22 @@ export class TareasController {
   }
 
   @Get()
-  listarMisTareas(@Req() req: RequestConUsuario) {
-    return this.tareasService.listarMisTareas(req.user.sub);
+  listarTareas(@Req() req: RequestConUsuario) {
+    return this.tareasService.listarTareas(
+      req.user.sub,
+      req.user.rol,
+    );
   }
 
   @Get(':id')
-  obtenerMiTarea(
+  obtenerTarea(
     @Param('id') id: string,
     @Req() req: RequestConUsuario,
   ) {
-    return this.tareasService.obtenerMiTarea(id, req.user.sub);
+    return this.tareasService.obtenerTarea(
+      id,
+      req.user.sub,
+      req.user.rol,
+    );
   }
 }
