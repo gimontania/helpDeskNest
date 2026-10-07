@@ -8,6 +8,7 @@ import { UsuariosModule } from './usuarios/usuarios.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { TareasModule } from './tareas/tareas.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ComentariosModule } from './comentarios/comentarios.module';
     CategoriasModule,
     TareasModule,
     ComentariosModule,
+    NotificacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
