@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { TareasModule } from './tareas/tareas.module';
+import { ComentariosModule } from './comentarios/comentarios.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TareasModule } from './tareas/tareas.module';
     UsuariosModule,
     CategoriasModule,
     TareasModule,
+    ComentariosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
