@@ -32,4 +32,30 @@ export class TareasService {
       },
     });
   }
+
+  async listarMisTareas(creadorId: string) {
+    return this.prisma.tarea.findMany({
+      where: {
+        creadorId,
+      },
+      orderBy: {
+        creadoEn: 'desc',
+      },
+    });
+  }
+
+  async obtenerMiTarea(id: string, creadorId: string) {
+    const tarea = await this.prisma.tarea.findFirst({
+      where: {
+        id,
+        creadorId,
+      },
+    });
+
+    if (!tarea) {
+      throw new NotFoundException('Ticket no encontrado');
+    }
+
+    return tarea;
+  }
 }
