@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { EstadoTarea, RolUsuario } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearTareaDto } from './dto/crear-tarea.dto';
@@ -34,8 +31,7 @@ export class TareasService {
   }
 
   async listarTareas(creadorId: string, rol: RolUsuario) {
-    const puedeVerTodas =
-      rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
+    const puedeVerTodas = rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
 
     return this.prisma.tarea.findMany({
       where: puedeVerTodas
@@ -68,13 +64,45 @@ export class TareasService {
     });
   }
 
-  async obtenerTarea(
-    id: string,
-    creadorId: string,
-    rol: RolUsuario,
-  ) {
-    const puedeVerTodas =
-      rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
+  async obtenerMetricas() {
+    const [total, agrupadoPorEstado, categorias] = await Promise.all([
+      this.prisma.tarea.count(),
+
+      this.prisma.tarea.groupBy({
+        by: ['estado'],
+        _count: { _all: true },
+      }),
+
+      this.prisma.categoria.findMany({
+        select: {
+          id: true,
+          nombre: true,
+          _count: { select: { tareas: true } },
+        },
+        orderBy: { nombre: 'asc' },
+      }),
+    ]);
+
+    const cantidadPorEstado = new Map(
+      agrupadoPorEstado.map((grupo) => [grupo.estado, grupo._count._all]),
+    );
+
+    return {
+      total,
+      porEstado: Object.values(EstadoTarea).map((estado) => ({
+        estado,
+        cantidad: cantidadPorEstado.get(estado) ?? 0,
+      })),
+      porCategoria: categorias.map((categoria) => ({
+        categoriaId: categoria.id,
+        nombre: categoria.nombre,
+        cantidad: categoria._count.tareas,
+      })),
+    };
+  }
+
+  async obtenerTarea(id: string, creadorId: string, rol: RolUsuario) {
+    const puedeVerTodas = rol === RolUsuario.ADMIN || rol === RolUsuario.AGENTE;
 
     const tarea = await this.prisma.tarea.findFirst({
       where: puedeVerTodas
