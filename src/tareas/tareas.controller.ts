@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -29,5 +31,18 @@ export class TareasController {
     @Req() req: RequestConUsuario,
   ) {
     return this.tareasService.crear(dto, req.user.sub);
+  }
+
+  @Get()
+  listarMisTareas(@Req() req: RequestConUsuario) {
+    return this.tareasService.listarMisTareas(req.user.sub);
+  }
+
+  @Get(':id')
+  obtenerMiTarea(
+    @Param('id') id: string,
+    @Req() req: RequestConUsuario,
+  ) {
+    return this.tareasService.obtenerMiTarea(id, req.user.sub);
   }
 }
