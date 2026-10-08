@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EstadoTarea, RolUsuario } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearTareaDto } from './dto/crear-tarea.dto';
@@ -6,6 +11,37 @@ import { CrearTareaDto } from './dto/crear-tarea.dto';
 @Injectable()
 export class TareasService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async asignarAgente(id: string, agenteId: string, rol: RolUsuario) {
+    if (rol !== RolUsuario.ADMIN) {
+      throw new ForbiddenException('Solo ADMIN puede asignar tickets');
+    }
+
+    const tarea = await this.prisma.tarea.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!tarea) throw new NotFoundException('Ticket no encontrado');
+
+    const agente = await this.prisma.usuario.findUnique({
+      where: { id: agenteId },
+      select: { rol: true },
+    });
+    if (!agente) throw new NotFoundException('Usuario no encontrado');
+    if (agente.rol !== RolUsuario.AGENTE) {
+      throw new BadRequestException(
+        'El usuario asignado debe tener rol AGENTE',
+      );
+    }
+
+    return this.prisma.tarea.update({
+      where: { id },
+      data: { agenteId },
+      include: {
+        agente: { select: { id: true, nombre: true, email: true, rol: true } },
+      },
+    });
+  }
 
   async crear(dto: CrearTareaDto, creadorId: string) {
     const categoria = await this.prisma.categoria.findUnique({
