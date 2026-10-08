@@ -17,6 +17,7 @@ import { RolUsuario } from '../generated/prisma/enums.js';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AsignarAgenteDto } from './dto/asignar-agente.dto';
+import { CambiarEstadoDto } from './dto/cambiar-estado.dto';
 
 interface RequestConUsuario extends Request {
   user: {
@@ -62,5 +63,16 @@ export class TareasController {
   @Get(':id')
   obtenerTarea(@Param('id') id: string, @Req() req: RequestConUsuario) {
     return this.tareasService.obtenerTarea(id, req.user.sub, req.user.rol);
+  }
+
+  @Patch(':id/estado')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN, RolUsuario.AGENTE)
+  cambiarEstado(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: CambiarEstadoDto,
+    @Req() req: RequestConUsuario,
+  ) {
+    return this.tareasService.cambiarEstado(id, dto.estado, req.user.rol);
   }
 }
