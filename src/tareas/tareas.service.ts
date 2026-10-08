@@ -23,11 +23,6 @@ export class TareasService {
   async asignarAgente(id: string, agenteId: string, rol: RolUsuario) {
     if (rol !== RolUsuario.ADMIN) {
       throw new ForbiddenException('Solo ADMIN puede asignar tickets');
-  async cambiarEstado(id: string, estado: EstadoTarea, rol: RolUsuario) {
-    if (rol !== RolUsuario.ADMIN && rol !== RolUsuario.AGENTE) {
-      throw new ForbiddenException(
-        'Solo ADMIN y AGENTE pueden cambiar el estado',
-      );
     }
 
     const tarea = await this.prisma.tarea.findUnique({
@@ -54,6 +49,17 @@ export class TareasService {
         agente: { select: { id: true, nombre: true, email: true, rol: true } },
       },
     });
+  }
+
+  async cambiarEstado(id: string, estado: EstadoTarea, rol: RolUsuario) {
+    if (rol !== RolUsuario.ADMIN && rol !== RolUsuario.AGENTE) {
+      throw new ForbiddenException(
+        'Solo ADMIN y AGENTE pueden cambiar el estado',
+      );
+    }
+
+    const tarea = await this.prisma.tarea.findUnique({
+      where: { id },
       select: { estado: true },
     });
     if (!tarea) throw new NotFoundException('Ticket no encontrado');
@@ -68,7 +74,6 @@ export class TareasService {
       );
     }
 
-    // La condición evita sobrescribir un cambio concurrente del estado.
     const [actualizada] = await this.prisma.tarea.updateManyAndReturn({
       where: { id, estado: tarea.estado },
       data: { estado },
