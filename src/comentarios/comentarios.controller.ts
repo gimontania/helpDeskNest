@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseUUIDPipe,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -10,6 +12,7 @@ import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
 import { RolUsuario } from '../generated/prisma/enums.js';
 import { ComentariosService } from './comentarios.service';
+import { CrearComentarioDto } from './dto/crear-comentario.dto';
 
 interface RequestConUsuario extends Request {
   user: {
@@ -23,6 +26,20 @@ interface RequestConUsuario extends Request {
 @UseGuards(JwtAuthGuard)
 export class ComentariosController {
   constructor(private readonly comentariosService: ComentariosService) {}
+
+  @Post()
+  crear(
+    @Param('tareaId', ParseUUIDPipe) tareaId: string,
+    @Body() dto: CrearComentarioDto,
+    @Req() req: RequestConUsuario,
+  ) {
+    return this.comentariosService.crear(
+      tareaId,
+      dto,
+      req.user.sub,
+      req.user.rol,
+    );
+  }
 
   @Get()
   listar(
