@@ -7,6 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { RolUsuario } from '../../generated/prisma/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CrearUsuarioDto {
   @IsString()
@@ -22,6 +23,7 @@ export class CrearUsuarioDto {
   @MinLength(8)
   password: string;
 
+  @ApiProperty({ enum: Object.values(RolUsuario) })
   @IsEnum(RolUsuario, {
     message: 'rol debe ser ADMIN, AGENTE o EMPLEADO',
   })

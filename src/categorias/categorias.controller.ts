@@ -16,7 +16,11 @@ import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { CrearCategoriaDto } from './dto/crear-categoria.dto';
 import { ActualizarCategoriaDto } from './dto/actualizar-categoria.dto';
 import { CategoriasService } from './categorias.service';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiProtegido } from '../common/decorators/api-errores.decorator';
 
+@ApiTags('Categorías')
+@ApiProtegido()
 @Controller('categorias')
 @UseGuards(JwtAuthGuard)
 export class CategoriasController {

@@ -18,6 +18,8 @@ import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AsignarAgenteDto } from './dto/asignar-agente.dto';
 import { CambiarEstadoDto } from './dto/cambiar-estado.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiProtegido } from '../common/decorators/api-errores.decorator';
 
 interface RequestConUsuario extends Request {
   user: {
@@ -27,6 +29,8 @@ interface RequestConUsuario extends Request {
   };
 }
 
+@ApiTags('Tareas')
+@ApiProtegido()
 @Controller('tareas')
 @UseGuards(JwtAuthGuard)
 export class TareasController {

@@ -13,6 +13,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
 import { RolUsuario } from '../generated/prisma/enums.js';
 import { ComentariosService } from './comentarios.service';
 import { CrearComentarioDto } from './dto/crear-comentario.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiProtegido } from '../common/decorators/api-errores.decorator';
 
 interface RequestConUsuario extends Request {
   user: {
@@ -22,6 +24,8 @@ interface RequestConUsuario extends Request {
   };
 }
 
+@ApiTags('Comentarios')
+@ApiProtegido()
 @Controller('tareas/:tareaId/comentarios')
 @UseGuards(JwtAuthGuard)
 export class ComentariosController {
