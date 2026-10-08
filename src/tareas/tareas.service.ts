@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -19,6 +20,9 @@ const SIGUIENTE_ESTADO: Record<EstadoTarea, EstadoTarea | null> = {
 export class TareasService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async asignarAgente(id: string, agenteId: string, rol: RolUsuario) {
+    if (rol !== RolUsuario.ADMIN) {
+      throw new ForbiddenException('Solo ADMIN puede asignar tickets');
   async cambiarEstado(id: string, estado: EstadoTarea, rol: RolUsuario) {
     if (rol !== RolUsuario.ADMIN && rol !== RolUsuario.AGENTE) {
       throw new ForbiddenException(
@@ -28,6 +32,28 @@ export class TareasService {
 
     const tarea = await this.prisma.tarea.findUnique({
       where: { id },
+      select: { id: true },
+    });
+    if (!tarea) throw new NotFoundException('Ticket no encontrado');
+
+    const agente = await this.prisma.usuario.findUnique({
+      where: { id: agenteId },
+      select: { rol: true },
+    });
+    if (!agente) throw new NotFoundException('Usuario no encontrado');
+    if (agente.rol !== RolUsuario.AGENTE) {
+      throw new BadRequestException(
+        'El usuario asignado debe tener rol AGENTE',
+      );
+    }
+
+    return this.prisma.tarea.update({
+      where: { id },
+      data: { agenteId },
+      include: {
+        agente: { select: { id: true, nombre: true, email: true, rol: true } },
+      },
+    });
       select: { estado: true },
     });
     if (!tarea) throw new NotFoundException('Ticket no encontrado');

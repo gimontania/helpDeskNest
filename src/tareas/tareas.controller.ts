@@ -16,6 +16,7 @@ import { CrearTareaDto } from './dto/crear-tarea.dto';
 import { RolUsuario } from '../generated/prisma/enums.js';
 import { RolesGuard } from '../auth/guards/roles/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AsignarAgenteDto } from './dto/asignar-agente.dto';
 import { CambiarEstadoDto } from './dto/cambiar-estado.dto';
 
 interface RequestConUsuario extends Request {
@@ -30,6 +31,17 @@ interface RequestConUsuario extends Request {
 @UseGuards(JwtAuthGuard)
 export class TareasController {
   constructor(private readonly tareasService: TareasService) {}
+
+  @Patch(':id/agente')
+  @UseGuards(RolesGuard)
+  @Roles(RolUsuario.ADMIN)
+  asignarAgente(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: AsignarAgenteDto,
+    @Req() req: RequestConUsuario,
+  ) {
+    return this.tareasService.asignarAgente(id, dto.agenteId, req.user.rol);
+  }
 
   @Post()
   crear(@Body() dto: CrearTareaDto, @Req() req: RequestConUsuario) {
