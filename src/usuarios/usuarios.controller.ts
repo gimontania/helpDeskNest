@@ -12,10 +12,14 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolUsuario } from '../generated/prisma/enums';
 import { ListarUsuariosDto } from './dto/listar-usuarios.dto';
 import { CrearUsuarioDto } from './dto/crear-usuario.dto';
-import type { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiProtegido } from '../common/decorators/api-errores.decorator';
 import { UsuariosService } from './usuarios.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
+import type { Request } from 'express';
 
+@ApiTags('Usuarios')
+@ApiProtegido()
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
