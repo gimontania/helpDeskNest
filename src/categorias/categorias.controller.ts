@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { RolUsuario } from '../generated/prisma/enums';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,7 +28,7 @@ export class CategoriasController {
   }
 
   @Get(':id')
-  obtenerPorId(@Param('id') id: string) {
+  obtenerPorId(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriasService.obtenerPorId(id);
   }
 
@@ -33,7 +43,7 @@ export class CategoriasController {
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.AGENTE)
   actualizar(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ActualizarCategoriaDto,
   ) {
     return this.categoriasService.actualizar(id, dto);
@@ -42,9 +52,7 @@ export class CategoriasController {
   @Delete(':id')
   @UseGuards(RolesGuard)
   @Roles(RolUsuario.ADMIN, RolUsuario.AGENTE)
-  eliminar(@Param('id') id: string) {
+  eliminar(@Param('id', ParseUUIDPipe) id: string) {
     return this.categoriasService.eliminar(id);
-
   }
-
 }

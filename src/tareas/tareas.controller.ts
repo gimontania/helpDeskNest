@@ -61,7 +61,10 @@ export class TareasController {
   }
 
   @Get(':id')
-  obtenerTarea(@Param('id') id: string, @Req() req: RequestConUsuario) {
+  obtenerTarea(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Req() req: RequestConUsuario,
+  ) {
     return this.tareasService.obtenerTarea(id, req.user.sub, req.user.rol);
   }
 

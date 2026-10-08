@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+  IsUUID,
+} from 'class-validator';
 import { PrioridadTarea } from '../../generated/prisma/enums.js';
 
 export class CrearTareaDto {
@@ -14,7 +20,6 @@ export class CrearTareaDto {
   @IsEnum(PrioridadTarea)
   prioridad!: PrioridadTarea;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsUUID('all', { message: 'categoriaId debe ser un UUID válido' })
   categoriaId!: string;
 }
