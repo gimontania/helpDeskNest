@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TareasService } from '../tareas/tareas.service';
 import { RolUsuario } from '../generated/prisma/enums.js';
 import { ComentariosService } from './comentarios.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.services';
 
 describe('US-15: comentarios y propiedad del ticket', () => {
   let service: ComentariosService;
@@ -31,6 +32,10 @@ describe('US-15: comentarios y propiedad del ticket', () => {
         {
           provide: PrismaService,
           useValue: { tarea: { findFirst }, comentario: { create } },
+        },
+        {
+          provide: NotificacionesService,
+          useValue: { enviar: jest.fn() },
         },
       ],
     }).compile();

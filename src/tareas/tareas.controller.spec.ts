@@ -82,7 +82,12 @@ describe('US-13: endpoint y Guards reales', () => {
         .set('Authorization', `Bearer ${token(rol)}`)
         .send({ estado: 'EN_PROCESO' })
         .expect(200, { id, estado: 'EN_PROCESO' });
-      expect(cambiarEstado).toHaveBeenCalledWith(id, 'EN_PROCESO', rol);
+      expect(cambiarEstado).toHaveBeenCalledWith(
+        id,
+        'EN_PROCESO',
+        rol,
+        expect.any(String),
+      );
     },
   );
   it.each([{}, { estado: 'OTRO' }, { estado: null }, { estado: 'abierto' }])(

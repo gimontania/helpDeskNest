@@ -73,6 +73,11 @@ export class TareasController {
     @Body() dto: CambiarEstadoDto,
     @Req() req: RequestConUsuario,
   ) {
-    return this.tareasService.cambiarEstado(id, dto.estado, req.user.rol);
+    return this.tareasService.cambiarEstado(
+      id,
+      dto.estado,
+      req.user.rol,
+      req.user.sub,
+    );
   }
 }
