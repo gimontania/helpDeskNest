@@ -7,6 +7,7 @@ import { Test } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { RolUsuario } from '../generated/prisma/enums.js';
 import { TareasService } from './tareas.service';
+import { NotificacionesService } from '../notificaciones/notificaciones.services';
 
 describe('US-14: asignación de agentes', () => {
   let service: TareasService;
@@ -30,6 +31,7 @@ describe('US-14: asignación de agentes', () => {
             usuario: { findUnique: usuarioFind },
           },
         },
+        { provide: NotificacionesService, useValue: { enviar: jest.fn() } },
       ],
     }).compile();
     service = module.get(TareasService);

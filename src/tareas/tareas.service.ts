@@ -8,6 +8,8 @@ import {
 import { EstadoTarea, RolUsuario } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearTareaDto } from './dto/crear-tarea.dto';
+import { NotificacionesService } from '../notificaciones/notificaciones.services';
+import { TipoNotificacion } from '../notificaciones/notificaciones.types';
 
 const SIGUIENTE_ESTADO: Record<EstadoTarea, EstadoTarea | null> = {
   ABIERTO: EstadoTarea.EN_PROCESO,
@@ -18,7 +20,10 @@ const SIGUIENTE_ESTADO: Record<EstadoTarea, EstadoTarea | null> = {
 
 @Injectable()
 export class TareasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificacionesService: NotificacionesService,
+  ) {}
 
   async asignarAgente(id: string, agenteId: string, rol: RolUsuario) {
     if (rol !== RolUsuario.ADMIN) {
@@ -51,7 +56,12 @@ export class TareasService {
     });
   }
 
-  async cambiarEstado(id: string, estado: EstadoTarea, rol: RolUsuario) {
+  async cambiarEstado(
+    id: string,
+    estado: EstadoTarea,
+    rol: RolUsuario,
+    usuarioId: string,
+  ) {
     if (rol !== RolUsuario.ADMIN && rol !== RolUsuario.AGENTE) {
       throw new ForbiddenException(
         'Solo ADMIN y AGENTE pueden cambiar el estado',
@@ -83,6 +93,25 @@ export class TareasService {
         'El ticket cambió mientras se procesaba la solicitud. Consulta su estado actual.',
       );
     }
+
+    try {
+      this.notificacionesService.enviar(
+        [actualizada.creadorId, actualizada.agenteId],
+        {
+          tipo: TipoNotificacion.ESTADO_CAMBIADO,
+          mensaje: `Tu ticket "${actualizada.titulo}" cambió de ${tarea.estado} a ${actualizada.estado}`,
+          tareaId: actualizada.id,
+          datos: {
+            estadoAnterior: tarea.estado,
+            estadoNuevo: actualizada.estado,
+          },
+        },
+        usuarioId,
+      );
+    } catch {
+      // Nunca debe deshacer el cambio de estado
+    }
+
     return actualizada;
   }
 
