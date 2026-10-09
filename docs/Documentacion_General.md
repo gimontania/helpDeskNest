@@ -188,6 +188,9 @@ docker compose exec api pnpm prisma db seed
    "fecha": "2026-10-08T14:30:00.000Z"
    }
 
+   para probar:
+   pnpm tsx scripts/escuchar-notificaciones.ts <access_token>
+
    Importante: hay que estar conectado cuando ocurre el evento; las notificaciones no se guardan ni se reenvían. Un cliente de WebSocket "puro" no sirve: hay que usar socket.io-client.
 
 10. Mejoras adicionales
