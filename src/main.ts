@@ -27,6 +27,8 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
   });
 
+  app.enableCors({ origin: 'http://localhost:5173' });
+
   app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(process.env.PORT ?? 3000);
