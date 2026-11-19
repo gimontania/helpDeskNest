@@ -67,26 +67,26 @@ describe('US-14: HTTP y permisos', () => {
       .send({ agenteId })
       .expect(401);
   });
-  it.each([RolUsuario.AGENTE, RolUsuario.EMPLEADO])(
-    'deniega solicitante %s',
+  it.each([RolUsuario.EMPLEADO])('deniega solicitante %s', async (rol) => {
+    await request(app.getHttpServer())
+      .patch(ruta)
+      .set('Authorization', `Bearer ${token(rol)}`)
+      .send({ agenteId })
+      .expect(403);
+    expect(asignarAgente).not.toHaveBeenCalled();
+  });
+  it.each([RolUsuario.ADMIN, RolUsuario.AGENTE])(
+    '%s puede asignar y no recibe datos sensibles',
     async (rol) => {
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .patch(ruta)
         .set('Authorization', `Bearer ${token(rol)}`)
         .send({ agenteId })
-        .expect(403);
-      expect(asignarAgente).not.toHaveBeenCalled();
+        .expect(200);
+      expect(response.body).toEqual({ id, agenteId });
+      expect(asignarAgente).toHaveBeenCalledWith(id, agenteId, rol);
     },
   );
-  it('ADMIN puede asignar y no recibe datos sensibles', async () => {
-    const response = await request(app.getHttpServer())
-      .patch(ruta)
-      .set('Authorization', `Bearer ${token(RolUsuario.ADMIN)}`)
-      .send({ agenteId })
-      .expect(200);
-    expect(response.body).toEqual({ id, agenteId });
-    expect(asignarAgente).toHaveBeenCalledWith(id, agenteId, RolUsuario.ADMIN);
-  });
   it.each([{}, { agenteId: null }, { agenteId: 'invalido' }, { agenteId: 1 }])(
     'rechaza DTO inválido %j',
     async (body) => {

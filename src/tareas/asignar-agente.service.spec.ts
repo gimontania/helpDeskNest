@@ -37,26 +37,33 @@ describe('US-14: asignación de agentes', () => {
     service = module.get(TareasService);
   });
 
-  it('asigna a un AGENTE existente y selecciona solo datos públicos', async () => {
-    await expect(
-      service.asignarAgente(id, agenteId, RolUsuario.ADMIN),
-    ).resolves.toEqual({ id, agenteId, estado: 'ABIERTO' });
-    expect(tareaFind).toHaveBeenCalledWith({
-      where: { id },
-      select: { id: true },
-    });
-    expect(usuarioFind).toHaveBeenCalledWith({
-      where: { id: agenteId },
-      select: { rol: true },
-    });
-    expect(update).toHaveBeenCalledWith({
-      where: { id },
-      data: { agenteId },
-      include: {
-        agente: { select: { id: true, nombre: true, email: true, rol: true } },
-      },
-    });
-  });
+  it.each([RolUsuario.ADMIN, RolUsuario.AGENTE])(
+    'solicitante %s asigna a un agente existente',
+    async (rol) => {
+      await expect(service.asignarAgente(id, agenteId, rol)).resolves.toEqual({
+        id,
+        agenteId,
+        estado: 'ABIERTO',
+      });
+      expect(tareaFind).toHaveBeenCalledWith({
+        where: { id },
+        select: { id: true },
+      });
+      expect(usuarioFind).toHaveBeenCalledWith({
+        where: { id: agenteId },
+        select: { rol: true },
+      });
+      expect(update).toHaveBeenCalledWith({
+        where: { id },
+        data: { agenteId },
+        include: {
+          agente: {
+            select: { id: true, nombre: true, email: true, rol: true },
+          },
+        },
+      });
+    },
+  );
 
   it.each([RolUsuario.ADMIN, RolUsuario.EMPLEADO])(
     'rechaza destinatario %s',
@@ -68,16 +75,13 @@ describe('US-14: asignación de agentes', () => {
       expect(update).not.toHaveBeenCalled();
     },
   );
-  it.each([RolUsuario.AGENTE, RolUsuario.EMPLEADO])(
-    'rechaza solicitante %s',
-    async (rol) => {
-      await expect(service.asignarAgente(id, agenteId, rol)).rejects.toThrow(
-        ForbiddenException,
-      );
-      expect(tareaFind).not.toHaveBeenCalled();
-      expect(update).not.toHaveBeenCalled();
-    },
-  );
+  it.each([RolUsuario.EMPLEADO])('rechaza solicitante %s', async (rol) => {
+    await expect(service.asignarAgente(id, agenteId, rol)).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(tareaFind).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+  });
   it('rechaza ticket inexistente', async () => {
     tareaFind.mockResolvedValue(null);
     await expect(
