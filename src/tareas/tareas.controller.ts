@@ -38,7 +38,7 @@ export class TareasController {
 
   @Patch(':id/agente')
   @UseGuards(RolesGuard)
-  @Roles(RolUsuario.ADMIN)
+  @Roles(RolUsuario.ADMIN, RolUsuario.AGENTE)
   asignarAgente(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: AsignarAgenteDto,

@@ -26,8 +26,8 @@ export class TareasService {
   ) {}
 
   async asignarAgente(id: string, agenteId: string, rol: RolUsuario) {
-    if (rol !== RolUsuario.ADMIN) {
-      throw new ForbiddenException('Solo ADMIN puede asignar tickets');
+    if (rol !== RolUsuario.ADMIN && rol !== RolUsuario.AGENTE) {
+      throw new ForbiddenException('Solo ADMIN y AGENTE pueden asignar tickets');
     }
 
     const tarea = await this.prisma.tarea.findUnique({
