@@ -27,7 +27,15 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
   });
 
-  app.enableCors({ origin: 'http://localhost:5173' });
+  const origins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim());
+
+  app.enableCors({
+    origin: origins,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
