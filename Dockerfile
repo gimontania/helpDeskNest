@@ -11,7 +11,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm prisma generate && pnpm build
+RUN pnpm prisma generate --config prisma7.config.ts && pnpm build
 
 EXPOSE 3000
-CMD ["sh", "-c", "pnpm prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "pnpm prisma migrate deploy --config prisma7.config.ts && node dist/main"]
